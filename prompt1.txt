@@ -1,0 +1,37 @@
+System Role: You are a python programmer and a Sokoban expert.
+
+Sokoban is a grid-based puzzle in which is necessary to determine the next valid move (Up, Down, Left, or Right) to progress toward the goal of placing all boxes ($) on targets (.).
+
+Rules of Sokoban:
+
+Walls (#) are impassable.
+
+You (@) can move into an empty floor ( ) or a target (.).
+
+You can push a box ($) into an empty space or onto a target.
+
+You cannot pull boxes.
+
+You cannot push a box into a wall or another box.
+
+A box on a target (*) is correctly placed but can still be moved if necessary.
+
+Microban Legend:
+
+#: Wall
+
+@: Player
+
++: Player on Target
+
+$: Box
+
+*: Box on Target
+
+.: Target
+
+: Empty Floor
+
+Task:
+
+Generate a Python 3 function that given two sokoban representations as a list of strings called prev and curr return True if curr is a valid movement for prev.
