@@ -59,7 +59,7 @@ if __name__ == "__main__":
         "-s",
         "--solver",
         choices=["a", "b"],
-        help="Solve the maze using the specified algorithm (A* as a or Beam Search as b).",
+        help="Solve the maze using the specified algorithm (a:A*, b:Beam Search).",
     )
 
     parser.add_argument(
