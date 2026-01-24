@@ -1,16 +1,16 @@
 import hashlib
 import heapq
 
-from utils import parse_maze, is_valid_move, apply_movement, is_goal
+from utils import parseMaze, isValidMove, applyMovement, isGoal
 from math import inf
 
 
-def compute_hash_from_maze(maze):
+def computeHashFromMaze(maze):
     return hashlib.sha256("\n".join(maze).encode("utf-8")).hexdigest()
 
 
-def H_Score(maze):
-    _, targets, boxes, _ = parse_maze(maze)
+def hScore(maze):
+    _, targets, boxes, _ = parseMaze(maze)
     dist = 0
     for r1, c1 in boxes:
         if (r1, c1) in targets:
@@ -23,74 +23,74 @@ def H_Score(maze):
     return dist
 
 
-def reconstruct_solution_path(maze, cameFrom, steps):
-    solution_path, hash = [], compute_hash_from_maze(maze)
+def reconstructSolutionPath(maze, cameFrom, steps):
+    solution_path, hash = [], computeHashFromMaze(maze)
     for _ in range(steps):
         dir, hash = cameFrom[hash]
         solution_path.append(dir)
     return list(reversed(solution_path))
 
 
-def A_Star(maze):
-    cameFrom, gScore, hScore = {}, {}, {}
-    start = compute_hash_from_maze(maze)
-    gScore[start] = 0
-    hScore[start] = H_Score(maze)
+def aStar(maze):
+    came_from, g_score, h_score = {}, {}, {}
+    start = computeHashFromMaze(maze)
+    g_score[start] = 0
+    h_score[start] = hScore(maze)
 
     queue = [(0, maze)]
     while queue:
         (steps, maze) = heapq.heappop(queue)
-        if is_goal(maze):
-            return maze, cameFrom, steps
-        source_hash = compute_hash_from_maze(maze)
+        if isGoal(maze):
+            return maze, came_from, steps
+        source_hash = computeHashFromMaze(maze)
 
         for step in ["up", "down", "left", "right"]:
-            if not is_valid_move(maze, step):
+            if not isValidMove(maze, step):
                 continue
 
-            neigh = apply_movement(maze, step)
-            dest_hash = compute_hash_from_maze(neigh)
-            tentative_score = gScore[source_hash] + 1
+            neigh = applyMovement(maze, step)
+            dest_hash = computeHashFromMaze(neigh)
+            tentative_score = g_score[source_hash] + 1
 
-            if tentative_score < gScore.get(dest_hash, inf):
-                cameFrom[dest_hash] = (step, source_hash)
-                gScore[dest_hash] = tentative_score
-                fScore = tentative_score + H_Score(neigh)
+            if tentative_score < g_score.get(dest_hash, inf):
+                came_from[dest_hash] = (step, source_hash)
+                g_score[dest_hash] = tentative_score
+                fScore = tentative_score + hScore(neigh)
                 heapq.heappush(queue, (fScore, neigh))
 
     return None, None, None
 
 
-def Beam_Search(maze, beam_size=5000):
-    cameFrom = {}
-    start = compute_hash_from_maze(maze)
+def beamSearch(maze, beam_size=5000):
+    came_from = {}
+    start = computeHashFromMaze(maze)
     visited = set([start])
 
     queue = [(0, 0, maze)]
     while queue:
         (_, steps, maze) = heapq.heappop(queue)
-        if is_goal(maze):
-            return maze, cameFrom, steps
+        if isGoal(maze):
+            return maze, came_from, steps
 
-        source_hash = compute_hash_from_maze(maze)
+        source_hash = computeHashFromMaze(maze)
         for step in ["up", "down", "left", "right"]:
-            if not is_valid_move(maze, step):
+            if not isValidMove(maze, step):
                 continue
 
-            neigh = apply_movement(maze, step)
-            dest_hash = compute_hash_from_maze(neigh)
+            neigh = applyMovement(maze, step)
+            dest_hash = computeHashFromMaze(neigh)
 
             if dest_hash in visited:
                 continue
 
-            score = H_Score(neigh)
+            score = hScore(neigh)
             if queue and len(queue) == beam_size and score > queue[0][0]:
                 (_, _, tmp_maze) = heapq.heappop(queue)
-                visited.remove(compute_hash_from_maze(tmp_maze))
+                visited.remove(computeHashFromMaze(tmp_maze))
 
             if len(queue) < beam_size:
                 visited.add(dest_hash)
-                cameFrom[dest_hash] = (step, source_hash)
+                came_from[dest_hash] = (step, source_hash)
                 heapq.heappush(queue, (score, steps + 1, neigh))
 
     return None, None, None

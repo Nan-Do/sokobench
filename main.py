@@ -2,19 +2,19 @@ import argparse
 import tty
 import termios
 
-from solver import A_Star, Beam_Search, reconstruct_solution_path
+from solver import aStar, beamSearch, reconstructSolutionPath
 from sys import stdin, stdout, exit
 from utils import (
-    read_mazes,
-    print_maze,
-    is_valid_move,
-    apply_movement,
-    is_goal,
-    show_solution_path,
+    readMazes,
+    printMaze,
+    isValidMove,
+    applyMovement,
+    isGoal,
+    showSolutionPath,
 )
 
 
-def get_key():
+def getKey():
     fd = stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     solve_game = args.solver
     show_animation = args.animation
 
-    mazes = read_mazes(input_file)
+    mazes = readMazes(input_file)
     print(f"Number of mazes: {len(mazes)}")
     if not 1 <= idx_maze <= len(mazes):
         print(f"Please select a number between 1 and {len(mazes)}")
@@ -86,26 +86,26 @@ if __name__ == "__main__":
     if solve_game:
         if solve_game == "a":
             print("Solving the maze using A*.")
-            goal_maze, cameFrom, steps = A_Star(maze)
+            goal_maze, came_from, steps = aStar(maze)
         else:
             print("Solving the maze using Beam Search.")
-            goal_maze, cameFrom, steps = Beam_Search(maze)
+            goal_maze, came_from, steps = beamSearch(maze)
 
         if show_animation:
-            solution_path = reconstruct_solution_path(goal_maze, cameFrom, steps)
-            show_solution_path(original_maze, solution_path)
+            solution_path = reconstructSolutionPath(goal_maze, came_from, steps)
+            showSolutionPath(original_maze, solution_path)
 
-        print(f"Solved in {steps} steps, {len(cameFrom)} states explored")
+        print(f"Solved in {steps} steps, {len(came_from)} states explored")
 
     if play_game:
         while True:
             stdout.write("\033[2J\033[H")
             stdout.flush()
-            print_maze(maze)
+            printMaze(maze)
             print("Movement (↑,↓,←,→,r:reset,q:quit):", end=" ", flush=True)
 
             dir = "no"
-            char = get_key()
+            char = getKey()
             print()
             if char in ["k", "K", "\x1b[A"]:
                 dir = "up"
@@ -120,14 +120,14 @@ if __name__ == "__main__":
             elif char == "q":
                 break
 
-            if not is_valid_move(maze, dir):
+            if not isValidMove(maze, dir):
                 print(f"Error applying {dir}")
                 continue
 
-            maze = apply_movement(maze, dir)
-            if is_goal(maze):
+            maze = applyMovement(maze, dir)
+            if isGoal(maze):
                 stdout.write("\033[2J\033[H")
                 stdout.flush()
-                print_maze(maze)
+                printMaze(maze)
                 print("Goal reached!!!")
                 break

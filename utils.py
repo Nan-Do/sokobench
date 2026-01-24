@@ -10,7 +10,7 @@ BOX_CHARS = {"$", "*"}
 PLAYER_CHARS = {"@", "+"}
 
 
-def read_mazes(fname: str):
+def readMazes(fname: str):
     with open(fname) as f:
         lines = f.readlines()
 
@@ -32,7 +32,7 @@ def read_mazes(fname: str):
     return mazes
 
 
-def parse_maze(
+def parseMaze(
     maze: list[str],
 ) -> Tuple[
     Set[Tuple[int, int]],  # Walls
@@ -63,19 +63,19 @@ def parse_maze(
     return walls, targets, boxes, player
 
 
-def is_goal(maze: list[str]):
-    _, targets, boxes, _ = parse_maze(maze)
+def isGoal(maze: list[str]):
+    _, targets, boxes, _ = parseMaze(maze)
     return targets == boxes
 
 
-def undo_movement(maze: list[str], direction) -> list[str]:
+def undoMovement(maze: list[str], direction) -> list[str]:
     """
     Undo the given movement to the current maze, return a copy of the maze
     with the movement applied
     """
 
     tmp_maze = [list(maze[row]) for row in range(len(maze))]
-    _, _, _, (r, c) = parse_maze(maze)
+    _, _, _, (r, c) = parseMaze(maze)
     # Translate the direction into a valid movement
     if direction == "up":
         dr, dc = -1, 0
@@ -119,14 +119,14 @@ def undo_movement(maze: list[str], direction) -> list[str]:
     return list(map(lambda row: "".join(row), tmp_maze))
 
 
-def apply_movement(maze: list[str], direction: str) -> list[str]:
+def applyMovement(maze: list[str], direction: str) -> list[str]:
     """
     Apply the given movement to the current maze, return a copy of the maze
     with the movement applied
     """
 
     tmp_maze = [list(maze[row]) for row in range(len(maze))]
-    _, _, _, (r, c) = parse_maze(maze)
+    _, _, _, (r, c) = parseMaze(maze)
     # Translate the direction into a valid movement
     if direction == "up":
         dr, dc = -1, 0
@@ -171,13 +171,13 @@ def apply_movement(maze: list[str], direction: str) -> list[str]:
     return list(map(lambda row: "".join(row), tmp_maze))
 
 
-def is_valid_move(maze: list[str], direction: str) -> bool:
+def isValidMove(maze: list[str], direction: str) -> bool:
     """
     Check if the given direction can be applied to the current maze
     """
 
     # Parse the maze
-    walls, _, _, (r, c) = parse_maze(maze)
+    walls, _, _, (r, c) = parseMaze(maze)
 
     # Translate the direction into a valid movement
     if direction == "up":
@@ -210,23 +210,23 @@ def is_valid_move(maze: list[str], direction: str) -> bool:
     return True
 
 
-def show_solution_path(maze, solution_path):
+def showSolutionPath(maze, solution_path):
     for dir in solution_path:
         stdout.write("\033[2J\033[H")
         stdout.flush()
-        print_maze(maze)
+        printMaze(maze)
         print("\n\n")
-        if not is_valid_move(maze, dir):
+        if not isValidMove(maze, dir):
             print("Invalid movement in the solution_path")
             return
-        maze = apply_movement(maze, dir)
+        maze = applyMovement(maze, dir)
         sleep(0.3)
     stdout.write("\033[2J\033[H")
     stdout.flush()
-    print_maze(maze)
+    printMaze(maze)
 
 
-def print_maze(maze: list[str]):
+def printMaze(maze: list[str]):
     for row in maze:
         enriched_str = []
         for char in row:
