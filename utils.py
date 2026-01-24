@@ -1,4 +1,5 @@
 from rich import print
+from sys import stdout
 from time import sleep
 from typing import Set, Tuple
 
@@ -211,13 +212,17 @@ def is_valid_move(maze: list[str], direction: str) -> bool:
 
 def show_solution_path(maze, solution_path):
     for dir in solution_path:
+        stdout.write("\033[2J\033[H")
+        stdout.flush()
         print_maze(maze)
-        print("\n====================\n")
+        print("\n\n")
         if not is_valid_move(maze, dir):
             print("Invalid movement in the solution_path")
             return
         maze = apply_movement(maze, dir)
         sleep(0.3)
+    stdout.write("\033[2J\033[H")
+    stdout.flush()
     print_maze(maze)
 
 
