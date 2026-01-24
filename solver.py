@@ -1,7 +1,7 @@
 import hashlib
 import heapq
 
-from utils import parseMaze, isValidMove, applyMovement, isGoal
+from engine import parseMaze, isValidMove, applyMovement, isGoal
 from math import inf
 
 

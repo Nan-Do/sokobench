@@ -4,7 +4,7 @@ import termios
 
 from solver import aStar, beamSearch, reconstructSolutionPath
 from sys import stdin, stdout, exit
-from utils import (
+from engine import (
     readMazes,
     printMaze,
     isValidMove,
