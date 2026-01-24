@@ -23,34 +23,74 @@ def H_Score(maze):
     return dist
 
 
-def compute_previous_step(maze, cameFrom):
-    maze_hash = compute_hash_from_maze(maze)
-    dir = cameFrom[maze_hash]
-    return undo_movement(maze, dir)
+def reconstruct_solution_path(maze, cameFrom, steps):
+    solution_path, hash = [], compute_hash_from_maze(maze)
+    for _ in range(steps):
+        dir, hash = cameFrom[hash]
+        solution_path.append(dir)
+    return list(reversed(solution_path))
 
 
 def A_Star(maze):
-    queue = [(0, maze)]
-    cameFrom = {}
+    cameFrom, gScore, hScore = {}, {}, {}
     start = compute_hash_from_maze(maze)
-    gScore, hScore = {}, {}
     gScore[start] = 0
     hScore[start] = H_Score(maze)
 
+    queue = [(0, maze)]
     while queue:
         (steps, maze) = heapq.heappop(queue)
         if is_goal(maze):
             return maze, cameFrom, steps
         source_hash = compute_hash_from_maze(maze)
-        for step in ["up", "down", "left", "right"]:
-            if is_valid_move(maze, step):
-                neigh = apply_movement(maze, step)
-                dest_hash = compute_hash_from_maze(neigh)
-                tentative_score = gScore[source_hash] + 1
-                if tentative_score < gScore.get(dest_hash, inf):
-                    cameFrom[dest_hash] = step
-                    gScore[dest_hash] = tentative_score
-                    fScore = tentative_score + H_Score(neigh)
-                    heapq.heappush(queue, (fScore, neigh))
 
-    return None, None
+        for step in ["up", "down", "left", "right"]:
+            if not is_valid_move(maze, step):
+                continue
+
+            neigh = apply_movement(maze, step)
+            dest_hash = compute_hash_from_maze(neigh)
+            tentative_score = gScore[source_hash] + 1
+
+            if tentative_score < gScore.get(dest_hash, inf):
+                cameFrom[dest_hash] = (step, source_hash)
+                gScore[dest_hash] = tentative_score
+                fScore = tentative_score + H_Score(neigh)
+                heapq.heappush(queue, (fScore, neigh))
+
+    return None, None, None
+
+
+def Beam_Search(maze, beam_size=5000):
+    cameFrom = {}
+    start = compute_hash_from_maze(maze)
+    visited = set([start])
+
+    queue = [(0, 0, maze)]
+    while queue:
+        (_, steps, maze) = heapq.heappop(queue)
+        if is_goal(maze):
+            return maze, cameFrom, steps
+
+        source_hash = compute_hash_from_maze(maze)
+        for step in ["up", "down", "left", "right"]:
+            if not is_valid_move(maze, step):
+                continue
+
+            neigh = apply_movement(maze, step)
+            dest_hash = compute_hash_from_maze(neigh)
+
+            if dest_hash in visited:
+                continue
+
+            score = H_Score(neigh)
+            if queue and len(queue) == beam_size and score > queue[0][0]:
+                (_, _, tmp_maze) = heapq.heappop(queue)
+                visited.remove(compute_hash_from_maze(tmp_maze))
+
+            if len(queue) < beam_size:
+                visited.add(dest_hash)
+                cameFrom[dest_hash] = (step, source_hash)
+                heapq.heappush(queue, (score, steps + 1, neigh))
+
+    return None, None, None

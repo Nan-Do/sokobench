@@ -1,5 +1,6 @@
-from typing import Set, Tuple
 from rich import print
+from time import sleep
+from typing import Set, Tuple
 
 # Symbol Definitions
 WALL_CHARS = {"#"}
@@ -206,6 +207,18 @@ def is_valid_move(maze: list[str], direction: str) -> bool:
             return False
 
     return True
+
+
+def show_solution_path(maze, solution_path):
+    for dir in solution_path:
+        print_maze(maze)
+        print("\n====================\n")
+        if not is_valid_move(maze, dir):
+            print("Invalid movement in the solution_path")
+            return
+        maze = apply_movement(maze, dir)
+        sleep(0.3)
+    print_maze(maze)
 
 
 def print_maze(maze: list[str]):

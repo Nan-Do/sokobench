@@ -3,8 +3,15 @@ import sys
 import tty
 import termios
 
-from solver import A_Star, compute_previous_step
-from utils import read_mazes, print_maze, is_valid_move, apply_movement, is_goal
+from solver import A_Star, Beam_Search, reconstruct_solution_path
+from utils import (
+    read_mazes,
+    print_maze,
+    is_valid_move,
+    apply_movement,
+    is_goal,
+    show_solution_path,
+)
 
 
 def get_key():
@@ -70,16 +77,11 @@ if __name__ == "__main__":
     maze = mazes[idx_maze - 1]
     original_maze = [row[:] for row in maze]
     if solve_game:
-        goal_maze, cameFrom, steps = A_Star(maze)
+        # goal_maze, cameFrom, steps = A_Star(maze)
+        goal_maze, cameFrom, steps = Beam_Search(maze)
         print(f"Solved in {steps} steps, {len(cameFrom)} states explored")
-        print_maze(goal_maze)
-        maze = goal_maze
-        while steps >= 0:
-            steps -= 1
-            maze = compute_previous_step(maze, cameFrom)
-            print()
-            print_maze(maze)
-            get_key()
+        solution_path = reconstruct_solution_path(goal_maze, cameFrom, steps)
+        show_solution_path(original_maze, solution_path)
 
     if play_game:
         while True:
