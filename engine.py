@@ -243,3 +243,67 @@ def printMaze(maze: list[str]):
             else:
                 enriched_str.append(char)
         print("".join(enriched_str))
+
+
+def isValidSuccesor(prev: list[str], curr: list[str]) -> bool:
+    """
+    Validates if 'curr' is a legal next state from 'prev' based on Sokoban rules.
+    """
+
+    # --- 1. Basic Dimension Checks ---
+    if len(prev) != len(curr) or not prev:
+        return False
+    rows = len(prev)
+    if any(len(prev[i]) != len(curr[i]) for i in range(rows)):
+        return False
+
+    # --- 2. Parse State ---
+    # We use sets to track coordinates of objects to decouple the symbols
+    # (e.g., '*' is both a target and a box).
+    prev_walls, prev_targets, prev_boxes, prev_player = parseMaze(prev)
+    curr_walls, curr_targets, curr_boxes, curr_player = parseMaze(curr)
+
+    # Validate Static Elements (Walls & Targets cannot change)
+    if prev_walls != curr_walls or prev_targets != curr_targets:
+        return False
+
+    # --- 3. Validate Movement ---
+    if not prev_player or not curr_player:
+        return False
+
+    pr, pc = prev_player
+    cr, cc = curr_player
+    dr, dc = cr - pr, cc - pc
+
+    # Must move exactly 1 square orthogonally
+    if abs(dr) + abs(dc) != 1:
+        return False
+
+    # Player cannot move into a wall
+    if curr_player in curr_walls:
+        return False
+
+    # --- 4. Validate Box Interaction ---
+    expected_boxes = prev_boxes.copy()
+
+    # Check if player moved into a box (PUSH operation)
+    if curr_player in prev_boxes:
+        # Calculate where the box should be pushed to
+        box_dest = (cr + dr, cc + dc)
+
+        # Box cannot be pushed into a wall
+        if box_dest in curr_walls:
+            return False
+
+        # Box cannot be pushed into another box
+        if box_dest in prev_boxes:
+            return False
+
+        # Update expected box positions
+        expected_boxes.remove(curr_player)  # Remove box from where player is now
+        expected_boxes.add(box_dest)  # Add box to new destination
+
+    # --- 5. Final State Match ---
+    # The boxes in 'curr' must match our calculated expectations exactly.
+    # This ensures no other boxes magically moved or disappeared.
+    return curr_boxes == expected_boxes
