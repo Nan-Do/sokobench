@@ -1,7 +1,7 @@
 import hashlib
 import heapq
 
-from utils import parse_maze, is_valid_move, apply_movement, is_goal, undo_movement
+from utils import parse_maze, is_valid_move, apply_movement, is_goal
 from math import inf
 
 
