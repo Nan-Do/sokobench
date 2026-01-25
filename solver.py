@@ -3,6 +3,7 @@ import heapq
 
 from engine import parseMaze, isValidMove, applyMovement, isGoal
 from math import inf
+from sortedcontainers import SortedList
 
 
 def computeHashFromMaze(maze):
@@ -66,9 +67,10 @@ def beamSearch(maze, beam_size=5000):
     start = computeHashFromMaze(maze)
     visited = set([start])
 
-    queue = [(0, 0, maze)]
+    queue = SortedList([(0, 0, maze)])
     while queue:
-        (_, steps, maze) = heapq.heappop(queue)
+        (_, steps, maze) = queue[0]
+        del queue[0]
         if isGoal(maze):
             return maze, came_from, steps
 
@@ -84,13 +86,14 @@ def beamSearch(maze, beam_size=5000):
                 continue
 
             score = hScore(neigh)
-            if queue and len(queue) == beam_size and score > queue[0][0]:
-                (_, _, tmp_maze) = heapq.heappop(queue)
+            if len(queue) == beam_size and score < queue[-1][0]:
+                (_, _, tmp_maze) = queue[-1]
+                del queue[-1]
                 visited.remove(computeHashFromMaze(tmp_maze))
 
             if len(queue) < beam_size:
                 visited.add(dest_hash)
                 came_from[dest_hash] = (step, source_hash)
-                heapq.heappush(queue, (score, steps + 1, neigh))
+                queue.add((score, steps + 1, neigh))
 
     return None, None, None
