@@ -61,7 +61,7 @@ if __name__ == "__main__":
         "-s",
         "--solver",
         choices=["a", "b", "c", "d"],
-        help="Solve the maze using the specified algorithm (a:A*, b:Beam Search).",
+        help="Solve the maze using the specified algorithm (a: A*, b: Beam Search, c: A* (LLM), d: Beam Search (LLM).",
     )
 
     parser.add_argument(
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     address = args.address
     port = args.port
 
-    if solve_game in "cdg":
+    if solve_game in "cd":
         prompt = open(prompt_file).read()
         client = OpenAI(
             base_url=f"http://{address}:{port}/v1",  # Standard llama.cpp server address
