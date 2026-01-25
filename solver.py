@@ -1,4 +1,3 @@
-import hashlib
 import heapq
 
 from engine import isValidMove, applyMovement, isGoal
