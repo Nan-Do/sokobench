@@ -5,7 +5,7 @@ from engine import isValidSuccesor, readMazes, printMaze
 from openai import OpenAI
 from tqdm import tqdm
 
-DEBUG = True
+DEBUG = False
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -66,15 +66,6 @@ if __name__ == "__main__":
         type=int,
     )
 
-    parser.add_argument(
-        "-d",
-        "--direction",
-        metavar="direction",
-        help="direction for the move",
-        choices=["up", "down", "left", "right"],
-        default="up",
-    )
-
     # Parse the input options
     args = parser.parse_args()
     mazes_file = args.input_file
@@ -83,7 +74,6 @@ if __name__ == "__main__":
     tries = args.tries
     address = args.address
     port = args.port
-    direction = args.direction
 
     mazes = readMazes(mazes_file)
     input_maze = mazes[number]
@@ -93,7 +83,7 @@ if __name__ == "__main__":
     valid = 0
     client = OpenAI(base_url=f"http://{address}:{port}/v1", api_key="not-needed")
 
-    print(f"Applying {direction} to maze:")
+    print("Input Maze:")
     printMaze(input_maze)
 
     for _ in tqdm(range(tries)):
@@ -103,7 +93,7 @@ if __name__ == "__main__":
                 {"role": "system", "content": prompt},
                 {
                     "role": "user",
-                    "content": f"Input Maze:\n```\n{input_maze}\n```\nDirection: {direction}",
+                    "content": f"Input Maze:\n```\n{input_maze}\n```\n",
                 },
             ],
             response_format={"type": "json_object"},  # Enforces JSON
@@ -113,10 +103,17 @@ if __name__ == "__main__":
         if response:
             data = json.loads(response.choices[0].message.content)
             output_maze = data["output"]
+            score = data["score"]
             if isValidSuccesor(input_maze, output_maze):
                 valid += 1
                 if DEBUG:
                     print("Valid output:")
                     printMaze(output_maze)
+                    print(f"Score: {score}")
+            else:
+                if DEBUG:
+                    print("Invalid output:")
+                    printMaze(output_maze)
+                    print(f"Score: {score}")
 
     print(f"Valid outputs: ({valid}/{tries})")
