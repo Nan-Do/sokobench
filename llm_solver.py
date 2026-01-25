@@ -1,7 +1,7 @@
 import heapq
 
-from engine import isValidMove, applyMovement, isGoal, printMaze, parseMaze
-from math import inf, log, exp
+from engine import isValidMove, applyMovement, isGoal
+from math import inf, exp
 from utils import hScore, computeHashFromMaze
 from sortedcontainers import SortedList
 
