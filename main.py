@@ -3,6 +3,7 @@ import tty
 import termios
 
 from solver import aStar, beamSearch, reconstructSolutionPath
+from llm_solver import llmAStar, llmBeamSearch
 from sys import stdin, stdout, exit
 from engine import (
     readMazes,
@@ -12,6 +13,7 @@ from engine import (
     isGoal,
     showSolutionPath,
 )
+from openai import OpenAI
 
 
 def getKey():
@@ -49,8 +51,8 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-p",
-        "--play",
+        "-m",
+        "--manually",
         help="Play to the game manually.",
         action="store_true",
     )
@@ -58,7 +60,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-s",
         "--solver",
-        choices=["a", "b"],
+        choices=["a", "b", "c", "d"],
         help="Solve the maze using the specified algorithm (a:A*, b:Beam Search).",
     )
 
@@ -68,12 +70,48 @@ if __name__ == "__main__":
         help="Show an animation of how the maze is solved (requires the -s option).",
         action="store_true",
     )
+
+    parser.add_argument(
+        "-l",
+        "--address",
+        metavar="address",
+        help="address of the llama-server endpoint.",
+        type=str,
+    )
+
+    parser.add_argument(
+        "-x",
+        "--port",
+        metavar="port",
+        help="port of the llama-server endpoint.",
+        default=10000,
+        type=int,
+    )
+
+    parser.add_argument(
+        "-p",
+        "--prompt",
+        metavar="prompt",
+        help="file containinig the prompt for the model.",
+        type=str,
+    )
+
     args = parser.parse_args()
     input_file = args.input_file
     idx_maze = args.number
-    play_game = args.play
+    manually = args.manually
     solve_game = args.solver
     show_animation = args.animation
+    prompt_file = args.prompt
+    address = args.address
+    port = args.port
+
+    if solve_game in "cdg":
+        prompt = open(prompt_file).read()
+        client = OpenAI(
+            base_url=f"http://{address}:{port}/v1",  # Standard llama.cpp server address
+            api_key="sk-no-key-required",  # Local server doesn't need a real key
+        )
 
     mazes = readMazes(input_file)
     print(f"Number of mazes: {len(mazes)}")
@@ -87,9 +125,15 @@ if __name__ == "__main__":
         if solve_game == "a":
             print("Solving the maze using A*.")
             goal_maze, came_from, steps = aStar(maze)
-        else:
+        elif solve_game == "b":
             print("Solving the maze using Beam Search.")
             goal_maze, came_from, steps = beamSearch(maze)
+        elif solve_game == "c":
+            print("Solving the maze using A* (LLM policy).")
+            goal_maze, came_from, steps = llmAStar(client, prompt, maze)
+        elif solve_game == "d":
+            print("Solving the maze using Beam Search (LLM policy).")
+            goal_maze, came_from, steps = llmBeamSearch(client, prompt, maze)
 
         if show_animation:
             solution_path = reconstructSolutionPath(goal_maze, came_from, steps)
@@ -97,7 +141,7 @@ if __name__ == "__main__":
 
         print(f"Solved in {steps} steps, {len(came_from)} states explored")
 
-    if play_game:
+    if manually:
         while True:
             stdout.write("\033[2J\033[H")
             stdout.flush()

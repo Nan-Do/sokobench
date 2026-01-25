@@ -1,27 +1,10 @@
 import hashlib
 import heapq
 
-from engine import parseMaze, isValidMove, applyMovement, isGoal
+from engine import isValidMove, applyMovement, isGoal
 from math import inf
 from sortedcontainers import SortedList
-
-
-def computeHashFromMaze(maze):
-    return hashlib.sha256("\n".join(maze).encode("utf-8")).hexdigest()
-
-
-def hScore(maze):
-    _, targets, boxes, _ = parseMaze(maze)
-    dist = 0
-    for r1, c1 in boxes:
-        if (r1, c1) in targets:
-            continue
-
-        max_dist = 0
-        for r2, c2 in targets:
-            max_dist = max(max_dist, abs(r2 - r1) + abs(c2 - c1))
-        dist += max_dist
-    return dist
+from utils import hScore, computeHashFromMaze
 
 
 def reconstructSolutionPath(maze, cameFrom, steps):
@@ -45,16 +28,16 @@ def aStar(maze):
             return maze, came_from, steps
         source_hash = computeHashFromMaze(maze)
 
-        for step in ["up", "down", "left", "right"]:
-            if not isValidMove(maze, step):
+        for direction in ["up", "down", "left", "right"]:
+            if not isValidMove(maze, direction):
                 continue
 
-            neigh = applyMovement(maze, step)
+            neigh = applyMovement(maze, direction)
             dest_hash = computeHashFromMaze(neigh)
             tentative_score = g_score[source_hash] + 1
 
             if tentative_score < g_score.get(dest_hash, inf):
-                came_from[dest_hash] = (step, source_hash)
+                came_from[dest_hash] = (direction, source_hash)
                 g_score[dest_hash] = tentative_score
                 fScore = tentative_score + hScore(neigh)
                 heapq.heappush(queue, (fScore, neigh))
@@ -75,11 +58,11 @@ def beamSearch(maze, beam_size=5000):
             return maze, came_from, steps
 
         source_hash = computeHashFromMaze(maze)
-        for step in ["up", "down", "left", "right"]:
-            if not isValidMove(maze, step):
+        for direction in ["up", "down", "left", "right"]:
+            if not isValidMove(maze, direction):
                 continue
 
-            neigh = applyMovement(maze, step)
+            neigh = applyMovement(maze, direction)
             dest_hash = computeHashFromMaze(neigh)
 
             if dest_hash in visited:
@@ -93,7 +76,7 @@ def beamSearch(maze, beam_size=5000):
 
             if len(queue) < beam_size:
                 visited.add(dest_hash)
-                came_from[dest_hash] = (step, source_hash)
+                came_from[dest_hash] = (direction, source_hash)
                 queue.add((score, steps + 1, neigh))
 
     return None, None, None
