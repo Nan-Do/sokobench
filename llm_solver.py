@@ -61,23 +61,25 @@ def llmBeamSearch(client, prompt, maze, beam_size=5000):
 
     queue = SortedList([(0, 0, maze)])
     while queue:
-        (_, direction, maze) = queue[0]
+        (_, steps, maze) = queue[0]
         del queue[0]
         if isGoal(maze):
-            return maze, came_from, direction
+            return maze, came_from, steps
 
         source_hash = computeHashFromMaze(maze)
-        for step in ["up", "down", "left", "right"]:
-            if not isValidMove(maze, step):
+        policy = getLlmActionPolicy(client, prompt, maze)
+        for direction, prob in policy.items():
+            direction = direction.lower()
+            if not isValidMove(maze, direction):
                 continue
 
-            neigh = applyMovement(maze, step)
+            neigh = applyMovement(maze, direction)
             dest_hash = computeHashFromMaze(neigh)
 
             if dest_hash in visited:
                 continue
 
-            score = hScore(neigh)
+            score = hScore(neigh) * (1 / (prob + 0.0000001))
             if len(queue) == beam_size and score < queue[-1][0]:
                 (_, _, tmp_maze) = queue[-1]
                 del queue[-1]
@@ -85,8 +87,10 @@ def llmBeamSearch(client, prompt, maze, beam_size=5000):
 
             if len(queue) < beam_size:
                 visited.add(dest_hash)
-                came_from[dest_hash] = (step, source_hash)
-                queue.add((score, direction + 1, neigh))
+                came_from[dest_hash] = (direction, source_hash)
+                queue.add((score, steps + 1, neigh))
+
+    return None, None, None
 
 
 def llmAStar(client, prompt, maze):
