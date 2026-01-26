@@ -102,9 +102,9 @@ if __name__ == "__main__":
     if prompt_format == "ascii":
         format_input = "formatted ASCII maze"
     elif prompt_format == "structured":
-        format_input = "maze represented using tuples of pairs indicating the coordinates of each element of the game"
+        format_input = "maze represented with tuples of pairs indicating the coordinates of each element of the game"
     elif prompt_format == "both":
-        format_input = "formatted ASCII maze annotated with tuples of pairs with the coordinates for each element of the game"
+        format_input = "formatted ASCII maze annotated with tuples of pairs indicating the coordinates for each element of the game"
 
     with open(prompt) as f:
         template = f.read()
