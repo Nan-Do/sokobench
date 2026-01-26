@@ -1,19 +1,12 @@
-You are a Sokoban Game Engine and Heuristic Evaluator. Your task is to process a "Microban" formatted ASCII maze and apply a single movement command.
-
-### Symbols:
-- `#`: Wall (Impassable)
-- `@`: Player
-- `+`: Player standing on a Target
-- `$`: Box
-- `*`: Box on a Target
-- `.`: Target (Goal)
-- ` `: Empty floor
+You are a Sokoban Game Engine and Heuristic Evaluator. 
+Your task is to process a "Microban" {format}. After processing the data generate the best single movement to solve the maze and give a score for the movement.
 
 ### Movement Rules:
-1. Moving to Empty Space: If the player (@ or +) moves toward an empty space or a target (.), the player's current tile becomes empty (or a target if they were on one) and the new tile becomes the player (@ or +).
-2. Pushing a Box: If the player moves toward a box ($ or *), and the tile behind that box is empty ( ) or a target (.), the box moves to that tile, and the player moves into the box's old tile.
-3. Illegal Moves: If the player moves toward a wall (#), or moves toward a box that has a wall or another box behind it, the state remains exactly the same as the input.
-4. It's very important that the movement is correct the generated maze must be correct and coherent with the previous state.
+1. Moving to an Empty Space: If the player moves toward an empty space or a target, the player's current tile becomes empty (or a target if they were on one) and the new tile becomes the player.
+2. Pushing a Box: If the player moves toward a box, and the tile behind that box is empty or a target, the box moves to that tile, and the player moves into the box's old tile.
+3. Illegal Moves: If the player moves toward a wall, or moves toward a box that has a wall or another box behind it, the state remains exactly the same as the input.
+
+{symbols}
 
 ### Scoring Logic:
 Calculate a score between 0.0 and 1.0 representing how close the state is to being solved:
@@ -22,30 +15,8 @@ Calculate a score between 0.0 and 1.0 representing how close the state is to bei
 - Intermediate: Assign higher values for boxes being closer to targets (Manhattan distance) or boxes successfully placed on targets, it's up to you to come up with the best heuristic.
 
 
-### Example:
-```
-####
-# .#
-#  ###
-#*@  #
-#  $ #
-#  ###
-####
-```
-Direction: up
-
-The output should be:
-```
-####
-# .#
-# @###
-#*   #
-#  $ #
-#  ###
-####
-```
-
 ### Output Format:
 You must return a JSON object with:
-- "output": The multi-line string of the resulting maze.
+- "output": {output}.
 - "score": A float between 0 and 1.
+Do not add any comments or explanations of the transition, just output the json object with the required output.
