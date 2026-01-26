@@ -92,18 +92,18 @@ if __name__ == "__main__":
     tries = args.tries
     address = args.address
     port = args.port
-    format_prompt = args.format
+    prompt_format = args.format
 
     mazes = readMazes(mazes_file)
     input_maze = mazes[number]
 
     format_input = ""
     output = "a string with the ASCII representation of the maze after applying the best movement."
-    if format_prompt == "ascii":
+    if prompt_format == "ascii":
         format_input = "formatted ASCII maze"
-    elif format_prompt == "structured":
+    elif prompt_format == "structured":
         format_input = "maze represented using tuples of pairs indicating the coordinates of each element of the game"
-    elif format_prompt == "both":
+    elif prompt_format == "both":
         format_input = "formatted ASCII maze annotated with tuples of pairs with the coordinates for each element of the game"
 
     with open(prompt) as f:
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         printMaze(input_maze)
 
     user_input = f"Input Maze:\n```\n{'\n'.join(input_maze)}\n```\n"
-    if format_prompt in ["both", "structured"]:
+    if prompt_format in ["both", "structured"]:
         walls, targets, boxes, player = parseMaze(input_maze)
         structured = """Coordinates:\n\"player\": {}\n\"walls\": {}\n\"boxes\": {}\n\"targets\": {}\n""".format(
             player,
