@@ -106,7 +106,7 @@ if __name__ == "__main__":
     address = args.address
     port = args.port
 
-    if solve_game in "cd":
+    if solve_game and solve_game in "cd":
         prompt = open(prompt_file).read()
         client = OpenAI(
             base_url=f"http://{address}:{port}/v1",  # Standard llama.cpp server address
@@ -142,12 +142,14 @@ if __name__ == "__main__":
         print(f"Solved in {steps} steps, {len(came_from)} states explored")
 
     if manually:
+        steps = 0
         while True:
             stdout.write("\033[2J\033[H")
             stdout.flush()
             printMaze(maze)
             print("Movement (↑,↓,←,→,r:reset,q:quit):", end=" ", flush=True)
 
+            steps += 1
             dir = "no"
             char = getKey()
             print()
@@ -160,6 +162,7 @@ if __name__ == "__main__":
             if char in ["h", "H", "\x1b[D"]:
                 dir = "left"
             elif char in ["r", "R"]:
+                steps = 0
                 maze = [row[:] for row in original_maze]
             elif char == "q":
                 break
@@ -174,4 +177,5 @@ if __name__ == "__main__":
                 stdout.flush()
                 printMaze(maze)
                 print("Goal reached!!!")
+                print(f"Solved the maze in {steps} steps.")
                 break
