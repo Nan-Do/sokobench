@@ -33,7 +33,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Agentic solver for Sokoban puzzles.")
 
     parser.add_argument(
-        "-f",
+        "-i",
         "--input_file",
         metavar="input_file",
         help="File containinig the description of the mazes in textual format.",
@@ -96,6 +96,14 @@ if __name__ == "__main__":
         type=str,
     )
 
+    parser.add_argument(
+        "-f",
+        "--format",
+        choices=["ascii", "structured", "both"],
+        default="ascii",
+        help="Select the maze format for the prompt (ascii, structured or both, default: ascii)",
+    )
+
     args = parser.parse_args()
     input_file = args.input_file
     idx_maze = args.number
@@ -105,6 +113,7 @@ if __name__ == "__main__":
     prompt_file = args.prompt
     address = args.address
     port = args.port
+    prompt_format = args.format
 
     if solve_game and solve_game in "cd":
         prompt = open(prompt_file).read()
@@ -130,10 +139,12 @@ if __name__ == "__main__":
             goal_maze, came_from, steps = beamSearch(maze)
         elif solve_game == "c":
             print("Solving the maze using A* (LLM policy).")
-            goal_maze, came_from, steps = llmAStar(client, prompt, maze)
+            goal_maze, came_from, steps = llmAStar(client, prompt, prompt_format, maze)
         elif solve_game == "d":
             print("Solving the maze using Beam Search (LLM policy).")
-            goal_maze, came_from, steps = llmBeamSearch(client, prompt, maze)
+            goal_maze, came_from, steps = llmBeamSearch(
+                client, prompt, prompt_format, maze
+            )
 
         if show_animation:
             solution_path = reconstructSolutionPath(goal_maze, came_from, steps)
