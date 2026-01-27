@@ -34,6 +34,7 @@ def aStar(
     # Keep reference of the previous state to reconstruct the solution using a dictionary,
     # and use another one to keep the best score for each state.
     came_from, g_score = {}, {}
+    # Use hashing of to identify the mazes
     start = computeHashFromMaze(maze)
     g_score[start] = 0
 
