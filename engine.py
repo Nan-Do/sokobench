@@ -1,7 +1,7 @@
 from rich import print
 from sys import stdout
 from time import sleep
-from typing import Set, Tuple
+from typing import Set, Tuple, List
 
 # Symbol Definitions
 WALL_CHARS = {"#"}
@@ -10,23 +10,36 @@ BOX_CHARS = {"$", "*"}
 PLAYER_CHARS = {"@", "+"}
 
 
-def readMazes(fname: str):
+def readMazes(fname: str) -> List[List[str]]:
+    """
+    Parse the file containing the Microban mazes.
+    fname must be the path to the file containing the mazes.
+    It returns a list with all the mazes parsed.
+    """
+
     with open(fname) as f:
         lines = f.readlines()
 
     mazes = []
     curr_line = 0
     while curr_line < len(lines):
+        # The first parsing line must contain a ";", otherwise return an error
         if lines[curr_line][0] != ";":
             print(
                 f"Error: Inconsistent format detected in the mazes file at line {curr_line + 1}, please review the file"
             )
+        # Skip the initial ';' and the following line which is empty.
         curr_line += 2
         maze = []
+
+        # Read lines until we detect an empty line
         while curr_line < len(lines) and lines[curr_line].strip():
             maze.append(lines[curr_line][:-1])
             curr_line += 1
+
+        # Add the parsed maze to the list
         mazes.append(maze)
+        # Skip the empty line
         curr_line += 1
 
     return mazes
@@ -40,6 +53,23 @@ def parseMaze(
     Set[Tuple[int, int]],  # Boxes
     Tuple[int, int],  # Player
 ]:
+    """
+    Parse a maze represented as a list of strings:
+    Ex:
+       [['#####'],
+        ['#@$.#'],
+        ['#####']]
+
+    It returns a tuple with set of positions for the elements of the game.
+    Each set contains pairs of tuples in the form (r, c).
+    For example:
+    If walls contains the tuple (2, 3) it means there's a wall in the maze
+    in the second row and third position.
+    The game elements it returns are:
+        walls, targets, boxes, player
+    Player is not a set but a single tuple.
+    """
+
     walls: Set[Tuple[int, int]] = set()
     targets: Set[Tuple[int, int]] = set()
     boxes: Set[Tuple[int, int]] = set()
@@ -59,11 +89,14 @@ def parseMaze(
             if char in PLAYER_CHARS:
                 player = (r, c)
 
-    # print(f"Player: {player}")
     return walls, targets, boxes, player
 
 
 def isGoal(maze: list[str]):
+    """
+    Check if a maze is solved.
+    """
+
     _, targets, boxes, _ = parseMaze(maze)
     return targets == boxes
 
@@ -71,7 +104,7 @@ def isGoal(maze: list[str]):
 def undoMovement(maze: list[str], direction) -> list[str]:
     """
     Undo the given movement to the current maze, return a copy of the maze
-    with the movement applied
+    with the movement applied.
     """
 
     tmp_maze = [list(maze[row]) for row in range(len(maze))]
@@ -122,7 +155,7 @@ def undoMovement(maze: list[str], direction) -> list[str]:
 def applyMovement(maze: list[str], direction: str) -> list[str]:
     """
     Apply the given movement to the current maze, return a copy of the maze
-    with the movement applied
+    with the movement applied.
     """
 
     tmp_maze = [list(maze[row]) for row in range(len(maze))]
@@ -210,8 +243,14 @@ def isValidMove(maze: list[str], direction: str) -> bool:
     return True
 
 
-def showSolutionPath(maze, solution_path):
+def animateSolutionPath(maze: List[str], solution_path: str) -> None:
+    """
+    Given a maze and a string with directions that solve the maze
+    make an animation solving the maze.
+    """
+
     for dir in solution_path:
+        # Clean the screen
         stdout.write("\033[2J\033[H")
         stdout.flush()
         printMaze(maze)
@@ -226,7 +265,11 @@ def showSolutionPath(maze, solution_path):
     printMaze(maze)
 
 
-def printMaze(maze: list[str]):
+def printMaze(maze: list[str]) -> None:
+    """
+    Given a maze pretty print it.
+    """
+
     for row in maze:
         enriched_str = []
         for char in row:
@@ -250,24 +293,22 @@ def isValidSuccesor(prev: list[str], curr: list[str]) -> bool:
     Validates if 'curr' is a legal next state from 'prev' based on Sokoban rules.
     """
 
-    # --- 1. Basic Dimension Checks ---
+    # Basic dimension checks
     if len(prev) != len(curr) or not prev:
         return False
     rows = len(prev)
     if any(len(prev[i]) != len(curr[i]) for i in range(rows)):
         return False
 
-    # --- 2. Parse State ---
-    # We use sets to track coordinates of objects to decouple the symbols
-    # (e.g., '*' is both a target and a box).
+    # Parse the mazes
     prev_walls, prev_targets, prev_boxes, prev_player = parseMaze(prev)
     curr_walls, curr_targets, curr_boxes, curr_player = parseMaze(curr)
 
-    # Validate Static Elements (Walls & Targets cannot change)
+    # Validate static elements (walls & targets cannot change)
     if prev_walls != curr_walls or prev_targets != curr_targets:
         return False
 
-    # --- 3. Validate Movement ---
+    # Check the player exists in both mazes
     if not prev_player or not curr_player:
         return False
 
@@ -283,10 +324,10 @@ def isValidSuccesor(prev: list[str], curr: list[str]) -> bool:
     if curr_player in curr_walls:
         return False
 
-    # --- 4. Validate Box Interaction ---
+    # validate box interaction
     expected_boxes = prev_boxes.copy()
 
-    # Check if player moved into a box (PUSH operation)
+    # Check if player moved into a box
     if curr_player in prev_boxes:
         # Calculate where the box should be pushed to
         box_dest = (cr + dr, cc + dc)
@@ -303,7 +344,7 @@ def isValidSuccesor(prev: list[str], curr: list[str]) -> bool:
         expected_boxes.remove(curr_player)  # Remove box from where player is now
         expected_boxes.add(box_dest)  # Add box to new destination
 
-    # --- 5. Final State Match ---
+    # Final state match
     # The boxes in 'curr' must match our calculated expectations exactly.
     # This ensures no other boxes magically moved or disappeared.
     return curr_boxes == expected_boxes

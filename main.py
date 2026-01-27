@@ -11,12 +11,17 @@ from engine import (
     isValidMove,
     applyMovement,
     isGoal,
-    showSolutionPath,
+    animateSolutionPath,
 )
 from openai import OpenAI
 
 
 def getKey():
+    """
+    Parse input keys for playing the sokoban game manually.
+    The function doesn't require to press enter to record the key press and
+    can handle the introduction of the arrow keys.
+    """
     fd = stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -30,6 +35,7 @@ def getKey():
 
 
 if __name__ == "__main__":
+    # Define the argument parser
     parser = argparse.ArgumentParser(description="Agentic solver for Sokoban puzzles.")
 
     parser.add_argument(
@@ -120,6 +126,7 @@ if __name__ == "__main__":
         type=float,
     )
 
+    # Get the variables from the argument parser
     args = parser.parse_args()
     input_file = args.input_file
     idx_maze = args.number
@@ -133,6 +140,7 @@ if __name__ == "__main__":
     print_csv = args.csv
     alpha = args.alpha
 
+    # Make sure there are not contradictory flags being used
     if print_csv and show_animation:
         print("Error: csv and show_animation options can't be used at the same time")
         exit(0)
@@ -145,6 +153,7 @@ if __name__ == "__main__":
         )
         exit(0)
 
+    # Handle the prompt format and client connection if a llm solving approach was requested
     cvs_prompt_format = "null"
     if solve_game and solve_game in "cd":
         if not address or not prompt_file:
@@ -156,9 +165,11 @@ if __name__ == "__main__":
         prompt = open(prompt_file).read()
         client = OpenAI(
             base_url=f"http://{address}:{port}/v1",  # Standard llama.cpp server address
-            api_key="sk-no-key-required",  # Local server doesn't need a real key
+            api_key="sk-no-key-required",  # Local llama-cpp server doesn't need a real key
         )
 
+    # Load the Microban mazes into memory and make sure that the number of the requested
+    # maze is between bounds.
     mazes = readMazes(input_file)
     if not print_csv:
         print(f"Number of mazes: {len(mazes)}")
@@ -166,8 +177,13 @@ if __name__ == "__main__":
         print(f"Error: Please select a number between 1 and {len(mazes)}")
         exit(0)
 
+    # Load the requested maze and keep a copy to be able to reset the game state
+    # when playing manually.
     maze = mazes[idx_maze - 1]
     original_maze = [row[:] for row in maze]
+
+    # Solving the maze using a search algorithm was requested.
+    # Take care of what information need to be printed and call the proper searching function
     if solve_game:
         solving_algorithm = ""
         if solve_game == "a":
@@ -195,10 +211,12 @@ if __name__ == "__main__":
                 client, prompt, prompt_format, maze, alpha
             )
 
+        # Do we need to show an animation of how the maze is solved?
         if show_animation:
             solution_path = reconstructSolutionPath(goal_maze, came_from, steps)
-            showSolutionPath(original_maze, solution_path)
+            animateSolutionPath(original_maze, solution_path)
 
+        # Do we need to print the regular output or the csv version for later analysis.
         if not print_csv:
             print(f"Solved in {steps} steps, {len(came_from)} states explored")
         else:
@@ -206,6 +224,9 @@ if __name__ == "__main__":
                 f"{idx_maze},{solving_algorithm},{steps},{len(came_from)},{cvs_prompt_format}"
             )
 
+    # Play the game manually:
+    # Use the arrows to produce a movement, q for quitting and r to going back
+    # to the initial state.
     if manually:
         steps = 0
         while True:

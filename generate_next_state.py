@@ -19,7 +19,7 @@ symbols = """### Symbols:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Test how probable it is for a model to generate a succesful Sokoban movement using an ascii art representation."
+        description="Test how probable it is for a model to generate a succesful Sokoban movement using different input representations for the maze."
     )
 
     parser.add_argument(
