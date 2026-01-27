@@ -218,11 +218,19 @@ if __name__ == "__main__":
 
         # Do we need to print the regular output or the csv version for later analysis.
         if not print_csv:
-            print(f"Solved in {steps} steps, {len(came_from)} states explored")
+            # Beam search can fail
+            if came_from:
+                print(f"Solved in {steps} steps, {len(came_from)} states explored")
+            else:
+                print("The algorithm was not able to find a solution")
         else:
-            print(
-                f"{idx_maze},{solving_algorithm},{steps},{len(came_from)},{cvs_prompt_format}"
-            )
+            # Beam search can fail
+            if came_from:
+                print(
+                    f"{idx_maze},{solving_algorithm},{steps},{len(came_from)},{cvs_prompt_format}"
+                )
+            else:
+                print(f"{idx_maze},{solving_algorithm},null,null,{cvs_prompt_format}")
 
     # Play the game manually:
     # Use the arrows to produce a movement, q for quitting and r to going back
