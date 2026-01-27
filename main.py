@@ -36,7 +36,7 @@ if __name__ == "__main__":
         "-i",
         "--input_file",
         metavar="input_file",
-        help="File containinig the description of the mazes in textual format.",
+        help="file containinig the description of the mazes in textual format.",
         required=True,
         type=str,
     )
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         "-n",
         "--number",
         metavar="number",
-        help="Number of the maze to solve.",
+        help="number of the maze to solve.",
         required=True,
         type=int,
     )
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-m",
         "--manually",
-        help="Play to the game manually.",
+        help="play to the game manually.",
         action="store_true",
     )
 
@@ -61,13 +61,13 @@ if __name__ == "__main__":
         "-s",
         "--solver",
         choices=["a", "b", "c", "d"],
-        help="Solve the maze using the specified algorithm (a: A*, b: Beam Search, c: A* (LLM), d: Beam Search (LLM).",
+        help="solve the maze using the specified algorithm (a: A*, b: Beam Search, c: A* (LLM), d: Beam Search (LLM).",
     )
 
     parser.add_argument(
-        "-a",
+        "-r",
         "--animation",
-        help="Show an animation of how the maze is solved (requires the -s option).",
+        help="show an animation of how the maze is solved (requires the -s option).",
         action="store_true",
     )
 
@@ -101,7 +101,23 @@ if __name__ == "__main__":
         "--format",
         choices=["ascii", "structured", "both"],
         default="ascii",
-        help="Select the maze format for the prompt (ascii, structured or both, default: ascii)",
+        help="select the maze format for the prompt (ascii, structured or both, default: ascii)",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--csv",
+        action="store_true",
+        help="ouput only the required data for analysis in CSV format (maze_id,algorithm,steps,states,format_string)",
+    )
+
+    parser.add_argument(
+        "-a",
+        "--alpha",
+        metavar="alpha",
+        help="confidence on the LLM's prediction (the higher the value the higher the confidence default 1.0",
+        default=1.0,
+        type=float,
     )
 
     args = parser.parse_args()
@@ -114,8 +130,29 @@ if __name__ == "__main__":
     address = args.address
     port = args.port
     prompt_format = args.format
+    print_csv = args.csv
+    alpha = args.alpha
 
+    if print_csv and show_animation:
+        print("Error: csv and show_animation options can't be used at the same time")
+        exit(0)
+    if manually and solve_game:
+        print("Error: manually and solve_game options can't be used at the same time")
+        exit(0)
+    if show_animation and not solve_game:
+        print(
+            "Error: the show_animation option requires to specify the solve_game option"
+        )
+        exit(0)
+
+    cvs_prompt_format = "null"
     if solve_game and solve_game in "cd":
+        if not address or not prompt_file:
+            print(
+                "Error: user is requesting to use an LLM solving algorithm but the server address or the system prompt file are missing."
+            )
+            exit(0)
+        cvs_prompt_format = prompt_format
         prompt = open(prompt_file).read()
         client = OpenAI(
             base_url=f"http://{address}:{port}/v1",  # Standard llama.cpp server address
@@ -123,34 +160,51 @@ if __name__ == "__main__":
         )
 
     mazes = readMazes(input_file)
-    print(f"Number of mazes: {len(mazes)}")
+    if not print_csv:
+        print(f"Number of mazes: {len(mazes)}")
     if not 1 <= idx_maze <= len(mazes):
-        print(f"Please select a number between 1 and {len(mazes)}")
+        print(f"Error: Please select a number between 1 and {len(mazes)}")
         exit(0)
 
     maze = mazes[idx_maze - 1]
     original_maze = [row[:] for row in maze]
     if solve_game:
+        solving_algorithm = ""
         if solve_game == "a":
-            print("Solving the maze using A*.")
+            if not print_csv:
+                print("Solving the maze using A*.")
+            solving_algorithm = "A*"
             goal_maze, came_from, steps = aStar(maze)
         elif solve_game == "b":
-            print("Solving the maze using Beam Search.")
+            if not print_csv:
+                print("Solving the maze using Beam Search.")
+            solving_algorithm = "Beam Search"
             goal_maze, came_from, steps = beamSearch(maze)
         elif solve_game == "c":
-            print("Solving the maze using A* (LLM policy).")
-            goal_maze, came_from, steps = llmAStar(client, prompt, prompt_format, maze)
+            if not print_csv:
+                print("Solving the maze using A* (LLM policy).")
+            solving_algorithm = "A*(LLM-Policy)"
+            goal_maze, came_from, steps = llmAStar(
+                client, prompt, prompt_format, maze, alpha
+            )
         elif solve_game == "d":
-            print("Solving the maze using Beam Search (LLM policy).")
+            if not print_csv:
+                print("Solving the maze using Beam Search (LLM policy).")
+            solving_algorithm = "Beam Search(LLM-Policy)"
             goal_maze, came_from, steps = llmBeamSearch(
-                client, prompt, prompt_format, maze
+                client, prompt, prompt_format, maze, alpha
             )
 
         if show_animation:
             solution_path = reconstructSolutionPath(goal_maze, came_from, steps)
             showSolutionPath(original_maze, solution_path)
 
-        print(f"Solved in {steps} steps, {len(came_from)} states explored")
+        if not print_csv:
+            print(f"Solved in {steps} steps, {len(came_from)} states explored")
+        else:
+            print(
+                f"{idx_maze},{solving_algorithm},{steps},{len(came_from)},{cvs_prompt_format}"
+            )
 
     if manually:
         steps = 0
