@@ -12,6 +12,7 @@ from engine import (
     applyMovement,
     isGoal,
     animateSolutionPath,
+    copy_maze,
 )
 from openai import OpenAI
 
@@ -162,7 +163,7 @@ if __name__ == "__main__":
             )
             exit(0)
         cvs_prompt_format = prompt_format
-        prompt = open(prompt_file).read()
+        prompt_template = open(prompt_file).read()
         client = OpenAI(
             base_url=f"http://{address}:{port}/v1",  # Standard llama.cpp server address
             api_key="sk-no-key-required",  # Local llama-cpp server doesn't need a real key
@@ -180,8 +181,7 @@ if __name__ == "__main__":
     # Load the requested maze and keep a copy to be able to reset the game state
     # when playing manually.
     maze = mazes[idx_maze - 1]
-    original_maze = [row[:] for row in maze]
-
+    original_maze = copy_maze(maze)
     # Solving the maze using a search algorithm was requested.
     # Take care of what information need to be printed and call the proper searching function
     if solve_game:
@@ -201,15 +201,17 @@ if __name__ == "__main__":
                 print("Solving the maze using A* (LLM policy).")
             solving_algorithm = "A*(LLM-Policy)"
             goal_maze, came_from, steps = llmAStar(
-                client, prompt, prompt_format, maze, alpha
+                client, prompt_template, prompt_format, maze, alpha
             )
         elif solve_game == "d":
             if not print_csv:
                 print("Solving the maze using Beam Search (LLM policy).")
             solving_algorithm = "Beam Search(LLM-Policy)"
             goal_maze, came_from, steps = llmBeamSearch(
-                client, prompt, prompt_format, maze, alpha
+                client, prompt_template, prompt_format, maze, alpha
             )
+        else:
+            gloal_maze, came_from, steps = None, None, 0
 
         # Do we need to show an animation of how the maze is solved?
         if show_animation:
@@ -257,7 +259,7 @@ if __name__ == "__main__":
                 dir = "left"
             elif char in ["r", "R"]:
                 steps = 0
-                maze = [row[:] for row in original_maze]
+                maze = copy_maze(original_maze)
             elif char == "q":
                 break
 

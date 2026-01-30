@@ -1,11 +1,19 @@
 import heapq
 
-from engine import isValidMove, applyMovement, isGoal, parseMaze
+from engine import (
+    Maze,
+    isValidMove,
+    applyMovement,
+    isGoal,
+    renderMaze,
+    computeHashFromMaze,
+)
 from math import inf, exp, log
-from utils import hScore, computeHashFromMaze
+from utils import hScore
 from openai import OpenAI
 from sortedcontainers import SortedList
 from typing import List, Dict, Tuple
+
 
 symbols = """### Maze Symbols:
 - `#`: Wall (Impassable)
@@ -19,7 +27,7 @@ symbols = """### Maze Symbols:
 
 
 def getLlmActionPolicy(
-    client: OpenAI, prompt: str, prompt_format: str, maze: List[str]
+    client: OpenAI, prompt: str, prompt_format: str, maze: Maze
 ) -> Dict[str, float]:
     """
     Queries the LLM for the next move and returns a probability distribution
@@ -30,19 +38,20 @@ def getLlmActionPolicy(
     if prompt_format == "ascii":
         system_prompt = prompt.format(format="formatted ASCII maze", symbols=symbols)
         # User prompt only contains the ascii representation of the maze.
-        user_prompt = "### current board:\n{}\n\n### best move:".format("\n".join(maze))
+        user_prompt = "### current board:\n{}\n\n### best move:".format(
+            renderMaze(maze)
+        )
     elif prompt_format == "structured":
         system_prompt = prompt.format(
             format="maze represented with tuples of pairs indicating the coordinates of each element of the game",
             symbols="",
         )
         # User prompt only contains the coordinates of the game elements.
-        walls, targets, boxes, player = parseMaze(maze)
         user_prompt = '### coordinates:\n"player": {}\n"walls": {}\n"boxes": {}\n"targets": {}\n\n### best move:'.format(
-            player,
-            walls,
-            boxes,
-            targets,
+            maze.player,
+            maze.walls,
+            maze.boxes,
+            maze.targets,
         )
     else:  # Both
         system_prompt = prompt.format(
@@ -50,13 +59,12 @@ def getLlmActionPolicy(
             symbols=symbols,
         )
         # User prompt contains ascii and coordinates of the game elements.
-        walls, targets, boxes, player = parseMaze(maze)
         user_prompt = '### current board:\n{}\n\n### coordinates:\n"player": {}\n"walls": {}\n"boxes": {}\n"targets": {}\n\n### best move:'.format(
-            "\n".join(maze),
-            player,
-            walls,
-            boxes,
-            targets,
+            renderMaze(maze),
+            maze.player,
+            maze.walls,
+            maze.boxes,
+            maze.targets,
         )
 
     messages = [
@@ -97,10 +105,10 @@ def llmBeamSearch(
     client: OpenAI,
     prompt: str,
     prompt_format: str,
-    maze: List[str],
+    maze: Maze,
     alpha: float = 1.0,
     beam_size: int = 5000,
-) -> Tuple[List[str] | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
+) -> Tuple[Maze | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
     """
     Perform LLM guided Beam Search on the given maze.
     """
@@ -164,9 +172,9 @@ def llmAStar(
     client: OpenAI,
     prompt: str,
     prompt_format: str,
-    maze: List[str],
+    maze: Maze,
     alpha: float = 1.0,
-) -> Tuple[List[str] | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
+) -> Tuple[Maze | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
     """
     Perform LLM guided A* Search on the given maze.
     """

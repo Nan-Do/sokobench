@@ -1,14 +1,14 @@
 import heapq
 
-from engine import isValidMove, applyMovement, isGoal
+from engine import isValidMove, applyMovement, isGoal, computeHashFromMaze, Maze
 from math import inf
 from sortedcontainers import SortedList
-from utils import hScore, computeHashFromMaze
+from utils import hScore
 from typing import List, Dict, Tuple
 
 
 def reconstructSolutionPath(
-    maze: List[str], cameFrom: Dict[str, Tuple[List[str], str]], steps: int
+    maze: Maze, cameFrom: Dict[str, Tuple[List[str], str]], steps: int
 ) -> List[str]:
     """
     Given the solution maze and the dictionary of previous states
@@ -25,8 +25,8 @@ def reconstructSolutionPath(
 
 
 def aStar(
-    maze: List[str],
-) -> Tuple[List[str] | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
+    maze: Maze,
+) -> Tuple[Maze | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
     """
     Perform A* Search on the given maze.
     """
@@ -72,8 +72,8 @@ def aStar(
 
 
 def beamSearch(
-    maze: List[str], beam_size: int = 5000
-) -> Tuple[List[str] | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
+    maze: Maze, beam_size: int = 5000
+) -> Tuple[Maze | None, Dict[str, Tuple[List[str], str]] | None, int | None]:
     """
     Perform Beam Search on the given maze.
     """

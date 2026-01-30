@@ -1,7 +1,7 @@
 import argparse
 import json
 
-from engine import isValidSuccesor, readMazes, printMaze, parseMaze
+from engine import isValidSuccesor, readMazes, printMaze, parseMaze, renderMaze
 from openai import OpenAI
 from tqdm import tqdm
 
@@ -121,14 +121,13 @@ if __name__ == "__main__":
         print("Input Maze:")
         printMaze(input_maze)
 
-    user_input = f"Input Maze:\n```\n{'\n'.join(input_maze)}\n```\n"
+    user_input = f"Input Maze:\n```\n{renderMaze(input_maze)}\n```\n"
     if prompt_format in ["both", "structured"]:
-        walls, targets, boxes, player = parseMaze(input_maze)
         structured = """Coordinates:\n\"player\": {}\n\"walls\": {}\n\"boxes\": {}\n\"targets\": {}\n""".format(
-            player,
-            walls,
-            boxes,
-            targets,
+            input_maze.player,
+            input_maze.walls,
+            input_maze.boxes,
+            input_maze.targets,
         )
         user_input += structured
 
@@ -153,18 +152,19 @@ if __name__ == "__main__":
         if response:
             try:
                 data = json.loads(response.choices[0].message.content)
-                output_maze = data["output"]
+                text_maze = data["output"].split("\n")
+                output_maze = parseMaze(text_maze)
                 score = data["score"]
                 if isValidSuccesor(input_maze, output_maze):
                     valid += 1
                     if DEBUG:
                         print("Valid output:")
-                        print(output_maze)
+                        printMaze(output_maze)
                         print(f"Score: {score}")
                 else:
                     if DEBUG:
                         print("Invalid output:")
-                        print(output_maze)
+                        printMaze(output_maze)
                         print(f"Score: {score}")
             except KeyError:
                 continue
