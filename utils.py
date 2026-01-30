@@ -1,6 +1,3 @@
-import hashlib
-
-
 def hScore(maze: Maze) -> int:
     """
     Given an input maze compute its hScore.
