@@ -346,4 +346,4 @@ def isValidSuccesor(prev: Maze, curr: Maze) -> bool:
     # Final state match
     # The boxes in 'curr' must match our calculated expectations exactly.
     # This ensures no other boxes magically moved or disappeared.
-    return curr_boxes == expected_boxes
+    return curr.boxes == expected_boxes
