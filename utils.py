@@ -1,3 +1,6 @@
+from engine import Maze
+
+
 def hScore(maze: Maze) -> int:
     """
     Given an input maze compute its hScore.
