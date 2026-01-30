@@ -5,8 +5,6 @@ from engine import isValidSuccesor, readMazes, printMaze, parseMaze, renderMaze
 from openai import OpenAI
 from tqdm import tqdm
 
-DEBUG = False
-
 symbols = """### Symbols:
 - `#`: Wall (Impassable)
 - `@`: Player
@@ -81,7 +79,11 @@ if __name__ == "__main__":
         "--format",
         choices=["ascii", "structured", "both"],
         default="ascii",
-        help="Select the maze format for the prompt (ascii, structured or both, default: ascii)",
+        help="select the maze format for the prompt (ascii, structured or both, default: ascii)",
+    )
+
+    parser.add_argument(
+        "-d", "--debug", help="show the debug output", action="store_true"
     )
 
     # Parse the input options
@@ -93,6 +95,7 @@ if __name__ == "__main__":
     address = args.address
     port = args.port
     prompt_format = args.format
+    debug = args.debug
 
     mazes = readMazes(mazes_file)
     input_maze = mazes[number]
@@ -110,20 +113,20 @@ if __name__ == "__main__":
         template = f.read()
     prompt = template.format(format=format_input, symbols=symbols, output=output)
 
-    if DEBUG:
+    if debug:
         print("Prompt:")
         print(prompt)
 
     valid = 0
     client = OpenAI(base_url=f"http://{address}:{port}/v1", api_key="not-needed")
 
-    if not DEBUG:
+    if not debug:
         print("Input Maze:")
         printMaze(input_maze)
 
     user_input = f"Input Maze:\n```\n{renderMaze(input_maze)}\n```\n"
     if prompt_format in ["both", "structured"]:
-        structured = """Coordinates:\n\"player\": {}\n\"walls\": {}\n\"boxes\": {}\n\"targets\": {}\n""".format(
+        structured = """\nCoordinates:\n\"player\": {}\n\"walls\": {}\n\"boxes\": {}\n\"targets\": {}\n""".format(
             input_maze.player,
             input_maze.walls,
             input_maze.boxes,
@@ -131,7 +134,7 @@ if __name__ == "__main__":
         )
         user_input += structured
 
-    if DEBUG:
+    if debug:
         print("User Input:")
         print(user_input)
 
@@ -157,12 +160,12 @@ if __name__ == "__main__":
                 score = data["score"]
                 if isValidSuccesor(input_maze, output_maze):
                     valid += 1
-                    if DEBUG:
+                    if debug:
                         print("Valid output:")
                         printMaze(output_maze)
                         print(f"Score: {score}")
                 else:
-                    if DEBUG:
+                    if debug:
                         print("Invalid output:")
                         printMaze(output_maze)
                         print(f"Score: {score}")
