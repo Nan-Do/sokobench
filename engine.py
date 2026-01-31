@@ -120,7 +120,7 @@ def parseMaze(
     return Maze(frozenset(walls), frozenset(targets), boxes, player, len(maze), max_col)
 
 
-def isGoal(maze: Maze):
+def isGoal(maze: Maze) -> bool:
     """
     Check if a maze is solved.
     """
