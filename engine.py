@@ -3,7 +3,7 @@ import hashlib
 from rich import print
 from sys import stdout
 from time import sleep
-from typing import Set, Tuple, List, NamedTuple
+from typing import FrozenSet, Set, Tuple, List, NamedTuple
 
 # Symbol Definitions
 WALL_CHARS = {"#"}
@@ -13,8 +13,8 @@ PLAYER_CHARS = {"@", "+"}
 
 
 class Maze(NamedTuple):
-    walls: Set[Tuple[int, int]]
-    targets: Set[Tuple[int, int]]
+    walls: FrozenSet[Tuple[int, int]]
+    targets: FrozenSet[Tuple[int, int]]
     boxes: Set[Tuple[int, int]]
     player: Tuple[int, int]
     rows: int
@@ -32,8 +32,8 @@ def copy_maze(maze: Maze, player: Tuple[int, int] | None = None) -> Maze:
         player = maze.player
 
     return Maze(
-        maze.walls.copy(),
-        maze.targets.copy(),
+        maze.walls,
+        maze.targets,
         maze.boxes.copy(),
         player,
         maze.rows,
@@ -117,7 +117,7 @@ def parseMaze(
             if char in PLAYER_CHARS:
                 player = (r, c)
 
-    return Maze(walls, targets, boxes, player, len(maze), max_col)
+    return Maze(frozenset(walls), frozenset(targets), boxes, player, len(maze), max_col)
 
 
 def isGoal(maze: Maze):
