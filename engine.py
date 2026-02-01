@@ -21,6 +21,33 @@ class Maze(NamedTuple):
     columns: int
 
 
+def getChar(maze: Maze, row: int, column: int) -> Tuple[char, string]:
+    """
+    Given a position in the maze return its character representation
+    and its rich color representation
+    """
+
+    if (row, column) in maze.walls:
+        return "#", "[bold]#[/bold]"
+
+    elif (row, column) in maze.boxes and (row, column) in maze.targets:
+        return "*", "[bold green]*[/bold green]"
+
+    elif (row, column) == maze.player and (row, column) in maze.targets:
+        return "+", "[bold blue]+[/bold blue]"
+
+    elif (row, column) in maze.targets:
+        return ".", "[green].[/green]"
+
+    elif (row, column) in maze.boxes:
+        return "$", "[bold magenta]$[/bold magenta]"
+
+    elif (row, column) == maze.player:
+        return "@", "[bold blue]@[/bold blue]"
+
+    return " ", " "
+
+
 def copy_maze(maze: Maze, player: Tuple[int, int] | None = None) -> Maze:
     """
     Make a copy of the input maze, if a position of the player is
@@ -134,19 +161,6 @@ def undoMovement(maze: Maze, direction) -> Maze | None:
     with the movement applied.
     """
 
-    (r, c) = maze.player
-    # Translate the direction into a valid movement
-    if direction == "up":
-        dr, dc = -1, 0
-    elif direction == "down":
-        dr, dc = 1, 0
-    elif direction == "left":
-        dr, dc = 0, -1
-    elif direction == "right":
-        dr, dc = 0, 1
-    else:
-        return None
-
     # !TODO: Finish the undoMovement implementation
     return None
 
@@ -243,22 +257,14 @@ def renderMaze(maze: Maze) -> str:
     """
 
     rendered_maze = []
-    for r in range(maze.rows):
+    for row in range(maze.rows):
         enriched_str = [" "] * maze.columns
-        for c in range(maze.columns):
-            if (r, c) in maze.walls:
-                enriched_str[c] = "#"
-            elif (r, c) in maze.boxes and (r, c) in maze.targets:
-                enriched_str[c] = "*"
-            elif (r, c) == maze.player and (r, c) in maze.targets:
-                enriched_str[c] = "+"
-            elif (r, c) in maze.targets:
-                enriched_str[c] = "."
-            elif (r, c) in maze.boxes:
-                enriched_str[c] = "$"
-            elif (r, c) == maze.player:
-                enriched_str[c] = "@"
+        for column in range(maze.columns):
+            character, _ = getChar(maze, row, column)
+            enriched_str[column] = character
+
         rendered_maze.append("".join(enriched_str))
+
     return "\n".join(rendered_maze)
 
 
@@ -267,21 +273,11 @@ def printMaze(maze: Maze) -> None:
     Given a maze pretty print it.
     """
 
-    for r in range(maze.rows):
+    for row in range(maze.rows):
         enriched_str = [" "] * maze.columns
-        for c in range(maze.columns):
-            if (r, c) in maze.walls:
-                enriched_str[c] = "[bold]#[/bold]"
-            elif (r, c) in maze.boxes and (r, c) in maze.targets:
-                enriched_str[c] = "[bold green]*[/bold green]"
-            elif (r, c) == maze.player and (r, c) in maze.targets:
-                enriched_str[c] = "[bold blue]+[/bold blue]"
-            elif (r, c) in maze.targets:
-                enriched_str[c] = "[green].[/green]"
-            elif (r, c) in maze.boxes:
-                enriched_str[c] = "[bold magenta]$[/bold magenta]"
-            elif (r, c) == maze.player:
-                enriched_str[c] = "[bold blue]@[/bold blue]"
+        for column in range(maze.columns):
+            _, enriched_character = getChar(maze, row, column)
+            enriched_str[column] = enriched_character
 
         print("".join(enriched_str))
 
