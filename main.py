@@ -214,7 +214,7 @@ if __name__ == "__main__":
             gloal_maze, came_from, steps = None, None, 0
 
         # Do we need to show an animation of how the maze is solved?
-        if show_animation:
+        if show_animation and came_from:
             solution_path = reconstructSolutionPath(goal_maze, came_from, steps)
             animateSolutionPath(original_maze, solution_path)
 
