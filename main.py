@@ -12,7 +12,7 @@ from engine import (
     applyMovement,
     isGoal,
     animateSolutionPath,
-    copy_maze,
+    copyMaze,
 )
 from openai import OpenAI
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     # Load the requested maze and keep a copy to be able to reset the game state
     # when playing manually.
     maze = mazes[idx_maze - 1]
-    original_maze = copy_maze(maze)
+    original_maze = copyMaze(maze)
     # Solving the maze using a search algorithm was requested.
     # Take care of what information need to be printed and call the proper searching function
     if solve_game:
@@ -259,7 +259,7 @@ if __name__ == "__main__":
                 dir = "left"
             elif char in ["r", "R"]:
                 steps = 0
-                maze = copy_maze(original_maze)
+                maze = copyMaze(original_maze)
             elif char == "q":
                 break
 

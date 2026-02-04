@@ -48,7 +48,7 @@ def getChar(maze: Maze, row: int, column: int) -> Tuple[char, string]:
     return " ", " "
 
 
-def copy_maze(maze: Maze, player: Tuple[int, int] | None = None) -> Maze:
+def copyMaze(maze: Maze, player: Tuple[int, int] | None = None) -> Maze:
     """
     Make a copy of the input maze, if a position of the player is
     given as parameter it will be used instead the position of the
@@ -127,7 +127,7 @@ def parseMaze(
     targets: Set[Tuple[int, int]] = set()
     boxes: Set[Tuple[int, int]] = set()
     player: Tuple[int, int] = (0, 0)
-    max_col = 0
+    max_col: int = 0
 
     for r, row in enumerate(maze):
         max_col = max(max_col, len(row))
@@ -184,7 +184,7 @@ def applyMovement(maze: Maze, direction: str) -> Maze:
 
     r, c = maze.player
     pr, pc = r + dr, c + dc
-    new_maze = copy_maze(maze, (pr, pc))
+    new_maze = copyMaze(maze, (pr, pc))
 
     # Check if the player is moving a box
     if (pr, pc) in maze.boxes:
