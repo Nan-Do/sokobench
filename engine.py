@@ -21,7 +21,7 @@ class Maze(NamedTuple):
     columns: int
 
 
-def getChar(maze: Maze, row: int, column: int) -> Tuple[char, string]:
+def getChar(maze: Maze, row: int, column: int) -> Tuple[str, str]:
     """
     Given a position in the maze return its character representation
     and its rich color representation
