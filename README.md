@@ -61,7 +61,7 @@ python3 main.py -i Microban.txt -n 1 -s a -f both -p generate_next_movement.txt 
 | -n, --number | Specific maze number to solve from the dataset. |
 | -s, --solver | a: A\*, b: Beam, c: LLM-Guided A\*, d: LLM-Guided Beam. |
 | -f, --format | Prompt format: ascii, structured, or both. |
-| -a, --alpha | Confidence Weight: Adjusts the influence of the LLM heuristic (f(n) = g(n) + α • h(n)). |
+| -a, --alpha | Confidence Weight: Adjusts the influence of the LLM heuristic. |
 | -c, --csv | Headless mode for data collection (outputs maze_id, algorithm, steps, states, format). |
 | -r, --animation | Visualize the solver's path in the terminal. |
 | -l, --address | Address of the LLM end-point. |
