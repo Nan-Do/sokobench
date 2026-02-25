@@ -170,6 +170,7 @@ def applyMovement(maze: Maze, direction: str) -> Maze:
     Apply the given movement to the current maze, return a copy of the maze
     with the movement applied.
     """
+
     # Translate the direction into a valid movement
     if direction == "up":
         dr, dc = -1, 0
@@ -199,6 +200,7 @@ def isValidMove(maze: Maze, direction: str) -> bool:
     """
     Check if the given direction can be applied to the current maze
     """
+
     # Translate the direction into a valid movement
     if direction == "up":
         dr, dc = -1, 0
@@ -246,6 +248,7 @@ def animateSolutionPath(maze: Maze, solution_path: str) -> None:
             return
         maze = applyMovement(maze, dir)
         sleep(0.3)
+
     stdout.write("\033[2J\033[H")
     stdout.flush()
     printMaze(maze)
@@ -258,12 +261,12 @@ def renderMaze(maze: Maze) -> str:
 
     rendered_maze = []
     for row in range(maze.rows):
-        enriched_str = [" "] * maze.columns
+        row_str = [" "] * maze.columns
         for column in range(maze.columns):
             character, _ = getChar(maze, row, column)
-            enriched_str[column] = character
+            row_str[column] = character
 
-        rendered_maze.append("".join(enriched_str))
+        rendered_maze.append("".join(row_str))
 
     return "\n".join(rendered_maze)
 
@@ -274,12 +277,12 @@ def printMaze(maze: Maze) -> None:
     """
 
     for row in range(maze.rows):
-        enriched_str = [" "] * maze.columns
+        enriched_row_str = [" "] * maze.columns
         for column in range(maze.columns):
             _, enriched_character = getChar(maze, row, column)
-            enriched_str[column] = enriched_character
+            enriched_row_str[column] = enriched_character
 
-        print("".join(enriched_str))
+        print("".join(enriched_row_str))
 
 
 def computeHashFromMaze(maze: Maze) -> str:
