@@ -155,14 +155,14 @@ if __name__ == "__main__":
         exit(0)
 
     # Handle the prompt format and client connection if a llm solving approach was requested
-    cvs_prompt_format = "null"
+    csv_prompt_format = "null"
     if solve_game and solve_game in "cd":
         if not address or not prompt_file:
             print(
                 "Error: user is requesting to use an LLM solving algorithm but the server address or the system prompt file are missing."
             )
             exit(0)
-        cvs_prompt_format = prompt_format
+        csv_prompt_format = prompt_format
         prompt_template = open(prompt_file).read()
         client = OpenAI(
             base_url=f"http://{address}:{port}/v1",  # Standard llama.cpp server address
@@ -229,10 +229,10 @@ if __name__ == "__main__":
             # Beam search can fail
             if came_from:
                 print(
-                    f"{idx_maze},{solving_algorithm},{steps},{len(came_from)},{cvs_prompt_format}"
+                    f"{idx_maze},{solving_algorithm},{steps},{len(came_from)},{csv_prompt_format}"
                 )
             else:
-                print(f"{idx_maze},{solving_algorithm},null,null,{cvs_prompt_format}")
+                print(f"{idx_maze},{solving_algorithm},null,null,{csv_prompt_format}")
 
     # Play the game manually:
     # Use the arrows to produce a movement, q for quitting and r to going back
