@@ -90,7 +90,7 @@ The **Alpha** parameter allows to tune the weight of the model's prediction. A h
 * **engine.py**: Core Sokoban logic and state management.
 * **solver.py**: Implementation of traditional A* and Beam Search.
 * **llm_solver.py**: Search algorithms integrated with LLM log-probability guidance.
-* **generate_next_state.py**: Script to evaluate if an LLM can predict the resulting maze state after a move.
+* **generate_next_state.py**: Script to evaluate if an LLM can generate a valid maze state when applying a move.
 * **Microban.txt**: Included dataset containing puzzles from the Microban collection.
 
 ---
