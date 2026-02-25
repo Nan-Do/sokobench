@@ -80,7 +80,7 @@ The framework treats the LLM as a **heuristic function** $h(s)$. For a given sta
 3. The probabilities for the four cardinal directions (Up, Down, Left, Right) are extracted and normalized to create a probability distribution.
 4. The search algorithm uses these probabilities to prioritize node expansion.
 
-The **Alpha** parameter allows researchers to tune the weight of the model's prediction. A higher value puts more trust in the LLM's spatial intuition, while a lower value relies more on the cost-to-reach ($g(n)$) of the traditional search.
+The **Alpha** parameter allows to tune the weight of the model's prediction. A higher value puts more trust in the LLM's spatial intuition, while a lower value relies more on the cost-to-reach of the traditional search.
 
 ---
 
