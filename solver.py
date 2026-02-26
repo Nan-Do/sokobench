@@ -107,7 +107,6 @@ def beamSearch(
 
             neigh = applyMovement(maze, direction)
             dest_hash = computeHashFromMaze(neigh)
-
             if dest_hash in visited:
                 continue
 
