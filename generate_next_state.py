@@ -173,5 +173,7 @@ if __name__ == "__main__":
                 continue
             except json.JSONDecodeError:
                 continue
+            except AttributeError:
+                continue
 
     print(f"Valid outputs: ({valid}/{tries})")
