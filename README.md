@@ -1,7 +1,5 @@
 # 🧩 SokoBench: A Framework for LLM-Guided Spatial Planning
 
-![Maze automatic resolution](./output.gif)
-
 **SokoBench** is an open-source evaluation framework designed to test the 2D spatial awareness and planning capabilities of Large Language Models (LLMs). By using LLMs as heuristic guides for traditional search algorithms (A* and Beam Search), SokoBench measures a model's ability to map symbolic state representations to effective spatial actions within the constrained environment of Sokoban puzzles.
 
 ---
